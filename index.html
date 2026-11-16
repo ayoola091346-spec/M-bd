@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Happy Birthday, Mum 🌙✨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Great+Vibes&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            background: #020617;
+            color: #fff;
+            font-family: 'DM Sans', sans-serif;
+            overflow: hidden;
+        }
+
+        body.ready {
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .script {
+            font-family: 'Great Vibes', cursive;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #020617;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 20px;
+        }
+
+        /* INTRO */
+        #intro {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: #020617;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 1.6s ease, visibility 1.6s ease;
+        }
+
+        #intro.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        #introCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .intro-content {
+            position: relative;
+            z-index: 2;
+            padding-bottom: 70px;
+        }
+
+        .intro-glow {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(217, 119, 6, .15), transparent 68%);
+            filter: blur(25px);
+            left: 50%;
+            top: 42%;
+            transform: translate(-50%, -50%);
+        }
+
+        .royal-crest {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f59e0b, #b45309);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 38px;
+            box-shadow: 0 0 30px rgba(245, 158, 11, .3), 0 0 70px rgba(217, 119, 6, .2);
+            animation: float 6s ease-in-out infinite;
+            margin: 0 auto 2rem auto;
+            border: 2px solid rgba(253, 230, 138, .4);
+        }
+
+        @keyframes float {
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 1.7s ease forwards;
+        }
+
+        .d1 {
+            animation-delay: .6s;
+        }
+
+        .d2 {
+            animation-delay: 1.4s;
+        }
+
+        .d3 {
+            animation-delay: 2.4s;
+        }
+
+        .d4 {
+            animation-delay: 3.5s;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .name-shimmer {
+            background: linear-gradient(90deg, #fff, #fde68a, #fbbf24, #fde68a, #fff);
+            background-size: 300% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shimmer 5s linear infinite;
+        }
+
+        @keyframes shimmer {
+            to {
+                background-position: 300% center;
+            }
+        }
+
+        #enterBtn {
+            position: relative;
+            overflow: hidden;
+        }
+
+        #enterBtn::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 70%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .35), transparent);
+            transform: skewX(-20deg);
+            transition: left .8s ease;
+        }
+
+        #enterBtn:hover::before {
+            left: 140%;
+        }
+
+        #enterBtn.entering {
+            transform: scale(1.08);
+            background: rgba(255, 255, 255, .15);
+            box-shadow: 0 0 30px rgba(253, 230, 138, .25);
+        }
+
+        /* APP */
+        #app {
+            min-height: 100vh;
+            position: relative;
+            background: #020617;
+        }
+
+        #journey {
+            display: none;
+        }
+
+        #journey.active {
+            display: block;
+        }
+
+        .scene {
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sky {
+            background: radial-gradient(circle at 50% 20%, rgba(217, 119, 6, .1), transparent 35%),
+                linear-gradient(180deg, #020617 0%, #080e1a 50%, #020617 100%);
+        }
+
+        .stars-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            border-radius: 50%;
+            background: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, .8);
+            opacity: .5;
+            animation: twinkle var(--dur) ease-in-out infinite alternate;
+        }
+
+        @keyframes twinkle {
+            to {
+                opacity: 1;
+                transform: scale(1.8);
+            }
+        }
+
+        .section-inner {
+            position: relative;
+            z-index: 5;
+            max-width: 1100px;
+            margin: auto;
+            padding: 80px 24px;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, .045);
+            border: 1px solid rgba(255, 255, 255, .1);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .3);
+        }
+
+        .gold {
+            color: #fde68a;
+        }
+
+        .gold-gradient {
+            background: linear-gradient(90deg, #fef3c7, #fde68a, #d97706);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(45px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        .reveal.show {
+            opacity: 1;
+            transform: none;
+        }
+
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, .05);
+            z-index: 80;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #fde68a, #f59e0b, #fbbf24);
+            transition: width .2s;
+        }
+
+        /* CONSTELLATION */
+        .constellation {
+            position: relative;
+            height: 450px;
+            max-width: 850px;
+            margin: auto;
+        }
+
+        .constellation svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .constellation-line {
+            stroke: rgba(253, 230, 138, .2);
+            stroke-width: 1.5;
+            stroke-dasharray: 6 8;
+        }
+
+        .constellation-star {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #fff7c2;
+            box-shadow: 0 0 10px #fde68a, 0 0 30px rgba(253, 230, 138, .6);
+            cursor: pointer;
+            transition: .4s;
+        }
+
+        .constellation-star:hover {
+            transform: scale(1.8);
+        }
+
+        .constellation-star.found {
+            background: #fff;
+            box-shadow: 0 0 15px #fff, 0 0 50px #fde68a;
+        }
+
+        /* CAKE */
+        .wish-cake {
+            cursor: pointer;
+            user-select: none;
+            transition: transform .5s;
+        }
+
+        .wish-cake:hover {
+            transform: scale(1.04);
+        }
+
+        /* PRAISE & BLESSINGS */
+        .tribute-card {
+            transition: .4s;
+        }
+
+        .tribute-card:hover {
+            transform: translateY(-6px);
+            border-color: rgba(253, 230, 138, .35);
+            background: rgba(255, 255, 255, .07);
+        }
+
+
+
+        /* ENVELOPE */
+        .envelope {
+            width: min(420px, 90vw);
+            height: 280px;
+            position: relative;
+            cursor: pointer;
+            perspective: 1000px;
+        }
+
+        .env-body {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(145deg, #f8fafc, #e2e8f0);
+            border-radius: 18px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, .35);
+            overflow: hidden;
+        }
+
+        .env-left,
+        .env-right {
+            position: absolute;
+            bottom: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            z-index: 2;
+        }
+
+        .env-left {
+            left: 0;
+            border-width: 140px 210px 0 0;
+            border-color: #cbd5e1 transparent transparent transparent;
+        }
+
+        .env-right {
+            right: 0;
+            border-width: 140px 0 0 210px;
+            border-color: #cbd5e1 transparent transparent transparent;
+        }
+
+        .env-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 145px 210px 0 210px;
+            border-color: #f1f5f9 transparent transparent transparent;
+            z-index: 4;
+            transform-origin: top;
+            transition: transform 1s ease;
+        }
+
+        .envelope.open .env-top {
+            transform: rotateX(180deg);
+        }
+
+        .letter {
+            position: absolute;
+            left: 8%;
+            width: 84%;
+            height: 220px;
+            bottom: 15px;
+            background: white;
+            border-radius: 12px;
+            padding: 26px;
+            color: #334155;
+            z-index: 1;
+            transition: transform 1s ease;
+        }
+
+        .envelope.open .letter {
+            transform: translateY(-155px);
+            z-index: 5;
+        }
+
+        .wax-seal {
+            position: absolute;
+            top: 115px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 46px;
+            height: 46px;
+            background: radial-gradient(circle, #b91c1c, #7f1d1d);
+            border-radius: 50%;
+            z-index: 6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, .4);
+            border: 2px solid #f87171;
+            font-size: 18px;
+            transition: .5s;
+        }
+
+        .envelope.open .wax-seal {
+            opacity: 0;
+            transform: translateX(-50%) scale(1.5);
+            pointer-events: none;
+        }
+
+        /* TOAST */
+        .toast {
+            position: fixed;
+            left: 50%;
+            bottom: 30px;
+            transform: translate(-50%, 20px);
+            opacity: 0;
+            z-index: 120;
+            transition: .5s;
+            pointer-events: none;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translate(-50%, 0);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- CINEMATIC INTRO -->
+    <section id="intro">
+        <canvas id="introCanvas"></canvas>
+        <div class="intro-glow"></div>
+        <div class="intro-content min-h-screen flex flex-col items-center justify-center text-center px-6">
+            <div class="royal-crest">👑</div>
+            <p class="fade-in text-amber-300/80 text-xs tracking-[.35em] uppercase">
+                A special celebration today
+            </p>
+            <p class="fade-in d1 serif text-2xl text-slate-300 mt-6">
+                For the woman who holds everything together.
+            </p>
+            <div class="fade-in d2 mt-7">
+                <p class="text-slate-500 text-xs tracking-[.28em] uppercase mb-4">
+                    Celebrating our Queen & Mother
+                </p>
+                <h1 class="name-shimmer serif text-6xl md:text-9xl font-bold">
+                    Mummy
+                </h1>
+            </div>
+            <p class="fade-in d3 mt-7 max-w-md text-slate-400 text-sm leading-7">
+                Because your prayers, sacrifices, and boundless love deserve more than just words on an ordinary day.
+            </p>
+            <button id="enterBtn" onclick="startExperience()"
+                class="fade-in d4 mt-9 mb-4 px-12 py-4 rounded-full border border-amber-300/30 bg-amber-500/10 text-amber-200 text-xs tracking-[.25em] uppercase hover:bg-amber-500/20 hover:scale-105 transition duration-500 shadow-lg shadow-amber-900/20">
+                Enter Your Celebration ✨
+            </button>
+            <p class="absolute bottom-7 text-[9px] tracking-[.3em] uppercase text-slate-600">
+                Created with deep love and respect
+            </p>
+        </div>
+    </section>
+
+    <!-- MAIN APP -->
+    <div id="app">
+        <div class="progress">
+            <div id="progressBar" class="progress-bar"></div>
+        </div>
+
+
+        <div id="journey">
+
+            <!-- HERO -->
+            <section class="scene sky">
+                <div id="stars1" class="stars-layer"></div>
+                <div class="section-inner min-h-screen flex items-center justify-center text-center">
+                    <div class="max-w-4xl reveal">
+                        <p class="text-xs tracking-[.4em] uppercase text-amber-400 mb-7">
+                            Happy Birthday, Iya Mi / Maami 👑
+                        </p>
+                        <h2 class="serif text-6xl md:text-9xl font-semibold leading-none">
+                            Today is all about
+                            <br>
+                            <span class="gold-gradient">
+                                You, Mummy.
+                            </span>
+                        </h2>
+                        <p class="max-w-xl mx-auto mt-9 text-slate-400 leading-8 text-base md:text-lg">
+                            For every midnight prayer you whispered, every sacrifice made in silence, and every smile
+                            you brought to our faces—this little sanctuary is for you.
+                        </p>
+                        <div class="mt-12 text-slate-500 animate-bounce">
+                            <span class="text-[10px] tracking-[.3em] uppercase">Scroll down, Mum</span>
+                            <div class="mt-2">↓</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 01 · VIRTUE CONSTELLATION -->
+            <section class="scene sky">
+                <div id="stars2" class="stars-layer"></div>
+                <div class="section-inner">
+                    <div class="text-center reveal">
+                        <p class="text-xs tracking-[.4em] uppercase text-amber-300">
+                            01 · Pillars of your character
+                        </p>
+                        <h2 class="serif text-5xl md:text-7xl mt-5">
+                            The virtues that define
+                            <span class="gold-gradient">
+                                your grace.
+                            </span>
+                        </h2>
+                        <p class="text-slate-400 max-w-xl mx-auto mt-5 leading-7">
+                            Tap each golden star in the sky below to reveal the qualities that make you extraordinary.
+                        </p>
+                    </div>
+
+                    <div class="constellation mt-12 reveal">
+                        <svg viewBox="0 0 850 470" preserveAspectRatio="none">
+                            <line class="constellation-line" x1="100" y1="320" x2="230" y2="160" />
+                            <line class="constellation-line" x1="230" y1="160" x2="400" y2="270" />
+                            <line class="constellation-line" x1="400" y1="270" x2="560" y2="110" />
+                            <line class="constellation-line" x1="560" y1="110" x2="710" y2="310" />
+                            <line class="constellation-line" x1="710" y1="310" x2="770" y2="170" />
+                            <line class="constellation-line" x1="400" y1="270" x2="710" y2="310" />
+                        </svg>
+
+                        <div class="constellation-star" style="left:11%;top:68%" onclick="findStar(this,0)"></div>
+                        <div class="constellation-star" style="left:26%;top:34%" onclick="findStar(this,1)"></div>
+                        <div class="constellation-star" style="left:47%;top:57%" onclick="findStar(this,2)"></div>
+                        <div class="constellation-star" style="left:66%;top:23%" onclick="findStar(this,3)"></div>
+                        <div class="constellation-star" style="left:83%;top:66%" onclick="findStar(this,4)"></div>
+                        <div class="constellation-star" style="left:90%;top:36%" onclick="findStar(this,5)"></div>
+
+                        <div id="starMessage"
+                            class="absolute left-1/2 bottom-2 -translate-x-1/2 text-center opacity-0 transition duration-700 w-full px-4">
+                            <p class="text-xs uppercase tracking-[.25em] text-amber-300">Honor & Tribute</p>
+                            <p id="starText" class="serif text-2xl md:text-3xl text-slate-200 mt-2 max-w-lg mx-auto">
+                            </p>
+                        </div>
+                    </div>
+                    <div id="starCount" class="text-center text-xs text-slate-500 mt-4">0 / 6 discovered</div>
+                </div>
+            </section>
+
+            <!-- 02 · CAKE & WISH -->
+            <section class="scene" style="background:linear-gradient(180deg,#080e1a,#14101f,#080e1a);">
+                <div class="section-inner min-h-screen flex items-center">
+                    <div class="grid md:grid-cols-2 gap-14 items-center w-full">
+                        <div class="reveal">
+                            <p class="text-xs tracking-[.4em] uppercase text-amber-300">02 · Your Special Day</p>
+                            <h2 class="serif text-6xl md:text-8xl mt-5 leading-none">
+                                Happy Birthday,
+                                <br>
+                                <span class="gold-gradient">
+                                    Mummy.
+                                </span>
+                            </h2>
+                            <p class="text-slate-400 leading-8 mt-8 max-w-lg text-base">
+                                May this new year of your life bring you profound peace of mind, unshakeable joy,
+                                overflowing abundance, and robust health. You deserve all the goodness the world has to
+                                offer.
+                            </p>
+                            <div class="mt-8 flex gap-3 flex-wrap">
+                                <span class="glass px-4 py-2 rounded-full text-xs text-amber-200">👑 Pure Grace</span>
+                                <span class="glass px-4 py-2 rounded-full text-xs text-amber-200">🤲 Endless
+                                    Prayers</span>
+                                <span class="glass px-4 py-2 rounded-full text-xs text-amber-200">✨ Good Health</span>
+                                <span class="glass px-4 py-2 rounded-full text-xs text-amber-200">💖 Deep Love</span>
+                            </div>
+                        </div>
+
+                        <div class="glass rounded-[2rem] p-8 md:p-12 text-center reveal">
+                            <div class="text-8xl md:text-9xl wish-cake" onclick="blowCandle()" id="cake">🎂</div>
+                            <div class="mt-7">
+                                <p class="text-xs tracking-[.25em] uppercase text-amber-300">Make a Birthday Wish</p>
+                                <p id="cakeText" class="serif text-3xl text-slate-200 mt-3">The candles are burning
+                                    brightly...</p>
+                                <button onclick="blowCandle()"
+                                    class="mt-6 px-7 py-3 rounded-full bg-amber-500 text-slate-950 font-semibold text-xs uppercase tracking-[0.2em] hover:bg-amber-400 transition shadow-lg shadow-amber-500/20">
+                                    Blow Candles & Celebrate ✨
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 03 · HEARTFELT PRAYERS (DUAS) -->
+            <section class="scene sky">
+                <div id="stars3" class="stars-layer"></div>
+                <div class="section-inner">
+                    <div class="text-center reveal">
+                        <p class="text-xs tracking-[.4em] uppercase text-emerald-400">03 · Prayers for Mum</p>
+                        <h2 class="serif text-5xl md:text-7xl mt-5">
+                            May Almighty Allah bless you
+                            <br>
+                            <span class="gold-gradient">
+                                beyond measure.
+                            </span>
+                        </h2>
+                        <p class="text-slate-400 max-w-xl mx-auto mt-5">Our heartfelt duas and invocations for your new
+                            age.</p>
+                    </div>
+
+                    <div class="grid md:grid-cols-2 gap-6 mt-14">
+                        <div class="tribute-card glass rounded-3xl p-7 reveal">
+                            <div class="text-3xl">🤲</div>
+                            <h3 class="serif text-3xl mt-4 text-amber-200">Good Health & Strength</h3>
+                            <p class="text-slate-400 leading-7 mt-3">
+                                May Almighty Allah grant you continuous sound health, renewed strength in your bones and
+                                body, and vitality to witness many more decades in joy.
+                            </p>
+                        </div>
+
+                        <div class="tribute-card glass rounded-3xl p-7 reveal">
+                            <div class="text-3xl">🏡</div>
+                            <h3 class="serif text-3xl mt-4 text-amber-200">Peace of Mind</h3>
+                            <p class="text-slate-400 leading-7 mt-3">
+                                May your home and heart remain filled with absolute tranquility. May you never
+                                experience sorrow, and may every heavy burden be lifted from your shoulders.
+                            </p>
+                        </div>
+
+                        <div class="tribute-card glass rounded-3xl p-7 reveal">
+                            <div class="text-3xl">🌟</div>
+                            <h3 class="serif text-3xl mt-4 text-amber-200">Long Life in Prosperity</h3>
+                            <p class="text-slate-400 leading-7 mt-3">
+                                May you live long enough to enjoy the glorious fruits of all your immense labor, seeing
+                                your children and grandchildren excel in grand style.
+                            </p>
+                        </div>
+
+                        <div class="tribute-card glass rounded-3xl p-7 reveal">
+                            <div class="text-3xl">🕊️</div>
+                            <h3 class="serif text-3xl mt-4 text-amber-200">Divine Protection</h3>
+                            <p class="text-slate-400 leading-7 mt-3">
+                                May the Almighty shield you and your household from every form of harm, putting
+                                permanent garments of safety, honor, and elevation upon you.
+                            </p>
+                        </div>
+
+                        <div class="tribute-card glass rounded-3xl p-7 reveal md:col-span-2">
+                            <div class="text-3xl">💫</div>
+                            <h3 class="serif text-3xl mt-4 text-amber-200">Al-Jannah Al-Firdaus</h3>
+                            <p class="text-slate-400 leading-7 mt-3 max-w-3xl">
+                                Above all earthly blessings, may your life be crowned with divine acceptance, and may
+                                your final abode in the hereafter be the highest station of Al-Jannah Al-Firdaus
+                                alongside your loved ones.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-14 reveal">
+                        <p class="script text-6xl text-amber-300">Ameen YRabbal Alameen.</p>
+                    </div>
+                </div>
+            </section>
+
+            
+            <!-- 05 · WAX-SEALED ENVELOPE & LETTER -->
+            <section class="scene sky">
+                <div class="section-inner min-h-screen flex flex-col items-center justify-center text-center">
+                    <div class="reveal">
+                        <p class="text-xs tracking-[.4em] uppercase text-rose-300">04 · A Personal Letter</p>
+                        <h2 class="serif text-5xl md:text-7xl mt-5">
+                            An open letter
+                            <br>
+                            just for <span class="gold-gradient">Mum.</span>
+                        </h2>
+                        <p class="text-slate-500 mt-5 max-w-md">Tap the wax seal on the envelope to open and read your
+                            birthday note.</p>
+                    </div>
+
+                    <div class="envelope mt-14 reveal" onclick="openEnvelope(this)">
+                        <div class="env-body"></div>
+                        <div class="wax-seal">👑</div>
+                        <div class="letter">
+                            <p class="text-xs uppercase tracking-[.2em] text-amber-600 font-bold">Happy Birthday, Mummy
+                            </p>
+                            <h3 class="serif text-2xl mt-1 text-slate-900 font-bold">Our Precious Mother 🌸</h3>
+                            <p class="text-xs mt-3 leading-5 text-slate-700">
+                                Thank you for being our anchor, our guidance, and our greatest cheerleader. Words cannot
+                                capture how much we appreciate your endless love and prayers. May God bless and keep you
+                                in perfect health today and always.
+                            </p>
+                            <p class="text-[11px] text-slate-500 mt-3 font-semibold">
+                                — With love and deepest respect from Khadeejah and siblings.
+                            </p>
+                        </div>
+                        <div class="env-left"></div>
+                        <div class="env-right"></div>
+                        <div class="env-top"></div>
+                    </div>
+                    <p id="envelopeHint" class="text-xs tracking-[.2em] uppercase text-slate-600 mt-6 reveal">Tap
+                        envelope to open</p>
+                </div>
+            </section>
+
+            <!-- FINALE -->
+            <section id="finale" class="scene"
+                style="background:radial-gradient(circle at 50% 35%,rgba(245,158,11,.12),transparent 35%),linear-gradient(180deg,#080e1a,#020617)">
+                <div id="finalStars" class="stars-layer"></div>
+                <div class="section-inner min-h-screen flex items-center justify-center text-center">
+                    <div class="max-w-4xl reveal">
+                        <p class="text-xs tracking-[.4em] uppercase text-amber-300">05 · Royal Celebration</p>
+                        <h2 class="serif text-6xl md:text-9xl mt-6 leading-none">
+                            Happy Birthday,
+                            <br>
+                            <span class="name-shimmer">
+                                Mummy
+                            </span>
+                        </h2>
+                        <p class="text-slate-400 max-w-2xl mx-auto mt-9 text-base md:text-lg leading-8">
+                            May Almighty Allah continue to honor you, elevate your status, grant you absolute peace, and
+                            fill your days with boundless happiness and gratitude.
+                        </p>
+                        <p class="serif text-3xl md:text-4xl text-amber-200 mt-10">We love and appreciate you beyond
+                            words.</p>
+                        <button onclick="grandFinale()"
+                            class="mt-12 px-10 py-4 rounded-full bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 font-semibold text-slate-950 shadow-2xl hover:scale-105 transition tracking-widest text-xs uppercase">
+                            Launch Grand Birthday Celebration 🎉
+                        </button>
+                        <p class="text-[10px] text-slate-600 uppercase tracking-[.3em] mt-14">Long may you live in
+                            health and grace, Mummy.</p>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <div id="toast" class="toast glass px-6 py-3 rounded-full text-sm text-amber-200 border border-amber-300/20"></div>
+
+    <script>
+        /* INTRO STAR CANVAS */
+        const introCanvas = document.getElementById('introCanvas');
+        const ictx = introCanvas.getContext('2d');
+        let introStars = [];
+
+        function resizeIntro() {
+            introCanvas.width = window.innerWidth * devicePixelRatio;
+            introCanvas.height = window.innerHeight * devicePixelRatio;
+            ictx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+            introStars = [];
+            for (let i = 0; i < 160; i++) {
+                introStars.push({
+                    x: Math.random() * innerWidth,
+                    y: Math.random() * innerHeight,
+                    r: Math.random() * 1.5 + 0.2,
+                    a: Math.random() * 0.7 + 0.2,
+                    s: Math.random() * 0.012 + 0.002
+                });
+            }
+        }
+        resizeIntro();
+        window.addEventListener('resize', resizeIntro);
+
+        function drawIntroStars() {
+            ictx.clearRect(0, 0, innerWidth, innerHeight);
+            introStars.forEach(s => {
+                s.a += s.s;
+                const alpha = 0.25 + Math.abs(Math.sin(s.a)) * 0.65;
+                ictx.beginPath();
+                ictx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                ictx.fillStyle = `rgba(255,255,255,${alpha})`;
+                ictx.fill();
+            });
+            requestAnimationFrame(drawIntroStars);
+        }
+        drawIntroStars();
+
+        let experienceStarted = false;
+        function startExperience() {
+            if (experienceStarted) return;
+            experienceStarted = true;
+            document.getElementById('enterBtn').classList.add('entering');
+            document.body.classList.add('entering');
+
+            setTimeout(() => {
+                document.getElementById('intro').classList.add('hide');
+                setTimeout(() => {
+                    document.body.classList.remove('entering');
+                    document.body.classList.add('ready');
+                    document.getElementById('journey').classList.add('active');
+
+
+                    createStars('stars1', 80);
+                    createStars('stars2', 60);
+                    createStars('stars3', 70);
+                    createStars('finalStars', 90);
+
+                    observeReveals();
+                    updateProgress();
+
+                    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+                    document.querySelector('#journey .reveal')?.classList.add('show');
+                    showToast("Welcome to Mum's special birthday sanctuary ✨");
+
+                    setTimeout(() => {
+                        bigConfetti();
+                    }, 400);
+                }, 700);
+            }, 850);
+        }
+
+        function createStars(id, count) {
+            const el = document.getElementById(id);
+            if (!el || el.children.length > 0) return;
+            for (let i = 0; i < count; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.setProperty('--dur', (2 + Math.random() * 4) + 's');
+                star.style.animationDelay = (Math.random() * 5) + 's';
+                el.appendChild(star);
+            }
+        }
+
+        /* CONSTELLATION DISCOVERY */
+        const starTexts = [
+            "Endless wisdom, patience, and guidance that lights our path every single day.",
+            "A heart filled with boundless compassion, always ready to forgive and embrace.",
+            "A pillar of strength and prayer who holds the entire family together with grace.",
+            "Unconditional love that never wavers, no matter the distance or circumstance.",
+            "A queen of elegance, dignity, and quiet resilience in all situations.",
+            "A blessing to us all—our greatest treasure and our number one intercessor in prayer."
+        ];
+
+        let foundStars = 0;
+        function findStar(node, index) {
+            if (node.classList.contains('found')) return;
+            node.classList.add('found');
+            foundStars++;
+            document.getElementById('starCount').innerText = `${foundStars} / 6 discovered`;
+
+            const msgBox = document.getElementById('starMessage');
+            const txt = document.getElementById('starText');
+            txt.innerText = starTexts[index];
+            msgBox.style.opacity = '1';
+
+            confetti({
+                particleCount: 25,
+                spread: 60,
+                origin: { y: 0.6 },
+                colors: ['#fde68a', '#f59e0b', '#fff']
+            });
+
+            if (foundStars === 6) {
+                showToast("✨ All constellation virtues uncovered for Mum!");
+                bigConfetti();
+            }
+        }
+
+        /* CAKE BLOWOUT */
+        function blowCandle() {
+            const cake = document.getElementById('cake');
+            const cakeText = document.getElementById('cakeText');
+            cake.innerText = '✨🎂✨';
+            cakeText.innerText = "Wishes released! May Almighty Allah answer every prayer of your heart, Mum.";
+            bigConfetti();
+            showToast("🎉 Happy Birthday to our beloved Mum!");
+        }
+
+
+
+        /* ENVELOPE */
+        function openEnvelope(el) {
+            el.classList.toggle('open');
+            if (el.classList.contains('open')) {
+                document.getElementById('envelopeHint').innerText = "Letter opened with love";
+                confetti({ particleCount: 30, spread: 70, origin: { y: 0.8 } });
+                showToast("💌 Letter opened successfully");
+            }
+        }
+
+
+
+
+        /* GRAND FINALE */
+        function grandFinale() {
+            bigConfetti();
+            setTimeout(bigConfetti, 400);
+            setTimeout(bigConfetti, 800);
+            showToast("👑 Happy Birthday to our Queen and Mother!");
+        }
+
+        function bigConfetti() {
+            confetti({
+                particleCount: 100,
+                spread: 90,
+                origin: { y: 0.5 },
+                colors: ['#fde68a', '#f59e0b', '#fbbf24', '#ffffff', '#e2e8f0']
+            });
+        }
+
+        /* SCROLL REVEALS & PROGRESS */
+        function observeReveals() {
+            const reveals = document.querySelectorAll('.reveal');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('show');
+                    }
+                });
+            }, { threshold: 0.12 });
+            reveals.forEach(r => observer.observe(r));
+        }
+
+        function updateProgress() {
+            window.addEventListener('scroll', () => {
+                const totalScroll = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const currentScroll = window.scrollY;
+                const progress = (currentScroll / totalScroll) * 100;
+                document.getElementById('progressBar').style.width = progress + '%';
+            });
+        }
+
+        function showToast(text) {
+            const toast = document.getElementById('toast');
+            toast.innerText = text;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3200);
+        }
+    </script>
+</body>
+
+</html>
